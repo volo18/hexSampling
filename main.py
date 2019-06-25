@@ -11,8 +11,8 @@ class Hexagon:
         self.yy      = cx + (r * np.sin(verts) )
         self.xx      = cy + (r * np.cos(verts) )
 
-        self.cx = cx
-        self.cy = cy
+        self.cx = int(cx)   #np.round(cx).astype(int)
+        self.cy = int(cy)  #np.round(cy).astype(int)
 
     def plotHex(self,figHandle = None, axHandle = None):
 
@@ -42,7 +42,7 @@ class HexLattice:
         self.H = H
         self.W = W
 
-        self.initHexagons() #[]
+        self.initHexagons() 
 
     def plotLattice(self):
 
@@ -92,20 +92,49 @@ class HexLattice:
             yy += self.diameter
 
 
+class HexSampler:
 
+    def __init__(self,nH,W,H):
 
+        self.hexLattice = HexLattice(nH,W,H)
+        self.n = len( self.hexLattice.hexes )
+
+    def sample(self,mtx):
+
+        vec = np.zeros( (self.n,1), np.float )
+        for ii, curhex in enumerate(self.hexLattice.hexes):
+            x = curhex.cx
+            y = curhex.cy
+            vec[ii] = mtx[y,x]
+
+        return vec
+
+    def computeFeatureVec(self,data): #where data is a list of feature maps
+
+        vec = np.empty((0,1), np.float)
+        for curMtx in data:
+            curVec = self.sample(curMtx) 
+            vec = np.append(vec, curVec, axis=0)
+
+        return vec
+
+        
+
+'''
+samples from a list of feature maps using a hexagonal lattice
+'''
 if __name__ == "__main__":
 
     centredHexagonNumber = 5
     H = 512
     W = 512
 
-    myLattice = HexLattice(centredHexagonNumber,W,H)
 
-    hexFig, hexAx = myLattice.plotLattice()
+    mySamp = HexSampler(centredHexagonNumber,H,W)
+    
+    mtx = np.ones((H,W), dtype=np.float)
 
-    for curHex in myLattice.hexes:
-        print( curHex.cx,curHex.cy )
+    vec = mySamp.computeFeatureVec([mtx, mtx])
 
-
+    mySamp.hexLattice.plotLattice()
     plt.show()
