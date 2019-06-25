@@ -52,20 +52,13 @@ class HexLattice:
 
         return fig, ax
 
-    def fillRow(self,yy,n,oddRow = False):
+    def fillRow(self,yy,padding = 0):
 
         hex_row = []
 
-        if oddRow == True:
-            offset = self.radius
-        else:
-            offset = 0
+        padding += self.radius
 
-        ii = np.floor(n/2).astype(int)
-        xCents = np.linspace( -ii ,self.W,n)
-
-
-        for xx in range(0,self.W - self.radius,self.diameter):
+        for xx in range(padding,self.W-padding, self.diameter):
             myHex = Hexagon(xx,yy,self.radius)
             hex_row.append(myHex)
 
@@ -78,40 +71,41 @@ class HexLattice:
         #middleRow
         nCentreRow = self.cHexN + 1
 
-        centerRow  = self.fillRow(self.H/2,nCentreRow) 
+        centerRow  = self.fillRow(self.H/2,0)
 
         self.hexes.extend( centerRow )
 
-#        #going up
-        #yy = self.H-2 - self.diameter
-        #nn = nCentreRow - 1
+        yy = self.H/2 - self.diameter
+        rowCounter = 0
+        while yy > 0:
+            rowCounter += 1
+            newRow  = self.fillRow(yy,self.radius*rowCounter)
+            self.hexes.extend(newRow)
+            yy -= self.diameter
 
-        #while nn > 0:
-            #curRow = self.fillRow(yy,nn)
-            #self.hexes.extend(curRow)
-            #break
-            #nn -= 1
-            #yy -= self.diameter
-
-       ## hexYY   = hexYY
-       ## nn      = nCentreRow - 1
-
-       ## #going up
-       ## while (hexYY > 0):
-       ##     hexYY -= self.diameter
+        yy = self.H/2 + self.diameter
+        rowCounter = 0
+        while yy < self.H:
+            rowCounter += 1
+            newRow  = self.fillRow(yy,self.radius*rowCounter)
+            self.hexes.extend(newRow)
+            yy += self.diameter
 
 
 
 
 if __name__ == "__main__":
 
-    myLattice = HexLattice(2,256,256)
+    centredHexagonNumber = 5
+    H = 512
+    W = 512
+
+    myLattice = HexLattice(centredHexagonNumber,W,H)
 
     hexFig, hexAx = myLattice.plotLattice()
+
+    for curHex in myLattice.hexes:
+        print( curHex.cx,curHex.cy )
+
+
     plt.show()
-
-
-
-    #plt.show()
-
-
